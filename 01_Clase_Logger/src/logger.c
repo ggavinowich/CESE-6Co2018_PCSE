@@ -230,25 +230,7 @@ int main( void ){
    delayConfig( &delay1s, 1000 );
 
    delay(12000); // El RTC tarda en setear la hora, por eso el delay tan grande
-#if 0
-   for( i=0; i<10; i++ ){
-      /* Leer fecha y hora */
-      val = rtcRead( &rtc );
-      /* Mostrar fecha y hora en formato "DD/MM/YYYY, HH:MM:SS" */
-      delay(1000);
-   }
 
-   rtc.year = 2018;
-   rtc.month = 7;
-   rtc.mday = 6;
-   rtc.wday = 6;
-   rtc.hour = 20;
-   rtc.min = 34;
-   rtc.sec= 0;
-
-   /* Establecer fecha y hora */
-   val = rtcWrite( &rtc );
-#endif
    // ------ PROGRAMA QUE ESCRIBE EN LA SD CH1;CH2;CH3;YYYY/MM/DD_hh:mm:ss;  -------
 
    UINT nbytes;
@@ -261,9 +243,9 @@ int main( void ){
       printf("No se pudo montar\r\n");
   }
 
-   // Create/open a file, then write a string and close it
 
-   adcConfig( ADC_ENABLE ); /* ADC */
+
+   adcConfig( ADC_ENABLE ); /* Habiltar ADC */
 
    /* Inicializar Retardo no bloqueante con tiempo en ms */
    delayConfig( &delay1,  500 );
@@ -282,22 +264,25 @@ int main( void ){
          muestra[2] = adcRead( CH3 );
 
          val = rtcRead( &rtc );
+         /* Convierto la fecha a string */
          getDateAndTime(&rtc, bufferRtc);
-
+   
+         // Create/open a file, then write a string and close it
          if( f_open( &fp, FILENAME, FA_WRITE | FA_OPEN_APPEND ) == FR_OK ) {
             uint8_t i;
 
             for (i = 0; i < NUMERO_MUESTRAS; i++) {
-               /* Conversión de muestra entera a ascii con base decimal */
+               /* Conversión de la muestra entera a ascii con base decimal */
                itoa( muestra[i], bufferMuestras, 10 ); /* 10 significa decimal */
+               /* Escribo la muestra */
                f_write( &fp, bufferMuestras, strlen(bufferMuestras), &nbytes );
-               f_write( &fp, ";", 1, &nbytes );
+               f_write( &fp, ";", 1, &nbytes ); /* LA ultima muestra tendrá el ; no parece grave */
                printf("%s;", bufferMuestras);
             }
             f_write( &fp, bufferRtc, strlen(bufferRtc), &nbytes );
             f_write( &fp, "\r\n", 2, &nbytes );
             printf("%s\r\n", bufferRtc);
-
+            /* Cierro hasta la siguiente muestra */
             f_close(&fp);
          } else {
             printf("fopen failed\r\n");

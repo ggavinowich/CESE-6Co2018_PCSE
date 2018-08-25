@@ -1,0 +1,1 @@
+Para compilar, debe hacerse un proyecto por cada board, y agregar la sapi_can a cada uno (o agregarla a la sapi como un driver nuevo)
